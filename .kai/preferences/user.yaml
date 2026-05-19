@@ -19,6 +19,6 @@ release_workflow:
     - "pluginst.inf version must exactly match <version>"
     - "Workflow publishes deploy/MdViewerWlx-<version>-tc.zip"
   example_current_release:
-    version: "1.0"
-    tag: "v1.0"
+    version: "1.0.1"
+    tag: "v1.0.1"
     commit_message: "Add GitHub release workflow for WLX plugin"

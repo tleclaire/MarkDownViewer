@@ -1,6 +1,6 @@
 [plugininstall]
-description=MdViewerWlx 1.0 - Markdown Lister Plugin (WPF + WebView2)
-version=1.0
+description=MdViewerWlx 1.0.1 - Markdown Lister Plugin (WPF + WebView2)
+version=1.0.1
 type=wlx
 file=MdViewerWlx.wlx
 defaultdir=wlx_mdviewer

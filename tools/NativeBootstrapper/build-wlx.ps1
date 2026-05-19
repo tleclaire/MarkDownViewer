@@ -36,14 +36,22 @@ if ([string]::IsNullOrWhiteSpace($PluginVersion)) {
 }
 
 # ---- Target directories ----
-$ReleaseRoot = "$ProjectRoot\MdViewerWlx\bin\Release\net10.0-windows"
-$PublishDir = "$ProjectRoot\MdViewerWlx\bin\Release\net10.0-windows\win-x64\publish"
+$ReleaseRootCandidates = @(
+    "$ProjectRoot\MdViewerWlx\bin\Release\net10.0-windows",
+    "$ProjectRoot\MdViewerWlx\bin\x64\Release\net10.0-windows"
+)
+$PublishDirCandidates = @(
+    "$ProjectRoot\MdViewerWlx\bin\Release\net10.0-windows\win-x64\publish",
+    "$ProjectRoot\MdViewerWlx\bin\x64\Release\net10.0-windows\win-x64\publish"
+)
 $DeployDir = "$ProjectRoot\deploy\wlx"
 $ZipPath = "$ProjectRoot\deploy\MdViewerWlx-$PluginVersion-tc.zip"
-$NativeOutput = $PublishDir
-$NativeObj = "$NativeOutput\wlx_bootstrapper.obj"
-$NativeLib = "$NativeOutput\MdViewerWlx.lib"
-$NativeExp = "$NativeOutput\MdViewerWlx.exp"
+$PublishDir = $null
+$ReleaseRoot = $null
+$NativeOutput = $null
+$NativeObj = $null
+$NativeLib = $null
+$NativeExp = $null
 $NativeDirArtifacts = @(
     "$NativeDir\Log",
     "$NativeDir\runtimes",
@@ -72,8 +80,18 @@ $NativeDirArtifacts = @(
     "$NativeDir\test_wlx_native.exe"
 )
 $LegacyDirs = @(
-    "$ReleaseRoot\publish",
-    "$ReleaseRoot\runtimes"
+    "$ProjectRoot\MdViewerWlx\bin\Release\net10.0-windows\publish",
+    "$ProjectRoot\MdViewerWlx\bin\Release\net10.0-windows\runtimes",
+    "$ProjectRoot\MdViewerWlx\bin\x64\Release\net10.0-windows\publish",
+    "$ProjectRoot\MdViewerWlx\bin\x64\Release\net10.0-windows\runtimes"
+)
+$NativeArtifactCandidates = @(
+    "$ProjectRoot\MdViewerWlx\bin\Release\net10.0-windows\win-x64\publish\wlx_bootstrapper.obj",
+    "$ProjectRoot\MdViewerWlx\bin\Release\net10.0-windows\win-x64\publish\MdViewerWlx.lib",
+    "$ProjectRoot\MdViewerWlx\bin\Release\net10.0-windows\win-x64\publish\MdViewerWlx.exp",
+    "$ProjectRoot\MdViewerWlx\bin\x64\Release\net10.0-windows\win-x64\publish\wlx_bootstrapper.obj",
+    "$ProjectRoot\MdViewerWlx\bin\x64\Release\net10.0-windows\win-x64\publish\MdViewerWlx.lib",
+    "$ProjectRoot\MdViewerWlx\bin\x64\Release\net10.0-windows\win-x64\publish\MdViewerWlx.exp"
 )
 
 Write-Host "=== MdViewerWlx Build+Deploy ===" -ForegroundColor Cyan
@@ -88,7 +106,7 @@ foreach ($dir in $LegacyDirs) {
     }
 }
 
-foreach ($file in @($NativeObj, $NativeLib, $NativeExp)) {
+foreach ($file in $NativeArtifactCandidates) {
     if (Test-Path $file) {
         Remove-Item $file -Force
         Write-Host "    - removed $file" -ForegroundColor Gray
@@ -109,6 +127,23 @@ Write-Host ""
 Write-Host "==> Step 1/5: Publishing managed assembly..." -ForegroundColor Yellow
 & dotnet publish $ManagedProject -c Release --no-self-contained -r win-x64
 if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed" }
+
+$PublishDir = $PublishDirCandidates |
+    Where-Object { Test-Path $_ } |
+    Sort-Object { (Get-Item $_).LastWriteTimeUtc } -Descending |
+    Select-Object -First 1
+
+if (-not $PublishDir) {
+    throw "Could not determine publish directory after dotnet publish. Checked: $($PublishDirCandidates -join ', ')"
+}
+
+$ReleaseRoot = Split-Path (Split-Path $PublishDir -Parent) -Parent
+$NativeOutput = $PublishDir
+$NativeObj = "$NativeOutput\wlx_bootstrapper.obj"
+$NativeLib = "$NativeOutput\MdViewerWlx.lib"
+$NativeExp = "$NativeOutput\MdViewerWlx.exp"
+
+Write-Host "  (ok) Using publish dir: $PublishDir" -ForegroundColor Green
 Write-Host "  (ok) Publish complete" -ForegroundColor Green
 Write-Host ""
 
@@ -186,11 +221,12 @@ if (Test-Path $AppHostDest) {
     Write-Host "  (ok) App host already present in publish dir" -ForegroundColor Green
 } else {
     # Fall back: look in build output
-    $BuildExe = "$ProjectRoot\MdViewerWlx\bin\Release\net10.0-windows\win-x64\MdViewerWlx.exe"
-    if (-not (Test-Path $BuildExe)) {
-        # Try non-RID-specific path
-        $BuildExe = "$ProjectRoot\MdViewerWlx\bin\Release\net10.0-windows\MdViewerWlx.exe"
-    }
+    $BuildExe = @(
+        "$ProjectRoot\MdViewerWlx\bin\Release\net10.0-windows\win-x64\MdViewerWlx.exe",
+        "$ProjectRoot\MdViewerWlx\bin\Release\net10.0-windows\MdViewerWlx.exe",
+        "$ProjectRoot\MdViewerWlx\bin\x64\Release\net10.0-windows\win-x64\MdViewerWlx.exe",
+        "$ProjectRoot\MdViewerWlx\bin\x64\Release\net10.0-windows\MdViewerWlx.exe"
+    ) | Where-Object { Test-Path $_ } | Select-Object -First 1
     if (Test-Path $BuildExe) {
         Copy-Item $BuildExe $AppHostDest -Force
         Write-Host "  (ok) App host copied from build output" -ForegroundColor Green
