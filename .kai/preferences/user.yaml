@@ -1,0 +1,24 @@
+release_workflow:
+  enabled: true
+  artifact_name_pattern: "MdViewerWlx-<version>-tc.zip"
+  release_tag_pattern: "v<version>"
+  version_source_file: "tools\\NativeBootstrapper\\pluginst.inf"
+  version_source_key: "version"
+  workflow_file: ".github\\workflows\\release-wlx.yml"
+  branch_for_release_commit: "master"
+  steps:
+    - "Update tools\\NativeBootstrapper\\pluginst.inf and set version=<version>"
+    - "Commit release-related changes"
+    - "Push commit to origin/master"
+    - "Create git tag v<version>"
+    - "Push git tag v<version>"
+    - "GitHub Actions builds deploy\\MdViewerWlx-<version>-tc.zip"
+    - "GitHub Actions publishes the ZIP as a GitHub Release asset"
+  validation_rules:
+    - "Git tag must exactly match v<version>"
+    - "pluginst.inf version must exactly match <version>"
+    - "Workflow publishes deploy/MdViewerWlx-<version>-tc.zip"
+  example_current_release:
+    version: "1.0"
+    tag: "v1.0"
+    commit_message: "Add GitHub release workflow for WLX plugin"

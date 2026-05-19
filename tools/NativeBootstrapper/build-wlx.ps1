@@ -8,7 +8,9 @@
 #   5. Creates a Total Commander installation ZIP with pluginst.inf at ZIP root
 #
 # Prerequisites:
-#   - ScopeCppSDK at C:\Program Files\Microsoft Visual Studio\18\Insiders\SDK\ScopeCppSDK\vc15
+#   - Either:
+#       - an initialized MSVC developer environment with cl.exe on PATH
+#       - or ScopeCppSDK at C:\Program Files\Microsoft Visual Studio\18\Insiders\SDK\ScopeCppSDK\vc15
 #   - .NET 10 SDK
 #
 
@@ -112,30 +114,61 @@ Write-Host ""
 
 # ---- Step 2: Compile native bootstrapper (.wlx) ----
 Write-Host "==> Step 2/5: Compiling native bootstrapper..." -ForegroundColor Yellow
-$ClExe = "$SdkRoot\VC\bin\cl.exe"
-if (-not (Test-Path $ClExe)) {
-    throw "ScopeCppSDK cl.exe not found at: $ClExe"
+$ClCommand = Get-Command cl.exe -ErrorAction SilentlyContinue
+$UseToolchainFromPath = $null -ne $ClCommand
+
+if ($UseToolchainFromPath) {
+    $ClExe = $ClCommand.Source
+    Write-Host "  (ok) Using cl.exe from PATH: $ClExe" -ForegroundColor Green
+} else {
+    $ClExe = "$SdkRoot\VC\bin\cl.exe"
+    if (-not (Test-Path $ClExe)) {
+        throw "cl.exe not found on PATH and ScopeCppSDK cl.exe not found at: $ClExe"
+    }
+
+    # ScopeCppSDK has nested structure: vc15/SDK/ (Windows SDK) and vc15/VC/ (compiler + CRT)
+    $SdkInclude = "$SdkRoot\SDK\include"
+    $VcInclude  = "$SdkRoot\VC\include"
+    $SdkLib     = "$SdkRoot\SDK\lib"
+    $VcLib      = "$SdkRoot\VC\lib"
 }
 
-# ScopeCppSDK has nested structure: vc15/SDK/ (Windows SDK) and vc15/VC/ (compiler + CRT)
-$SdkInclude = "$SdkRoot\SDK\include"
-$VcInclude  = "$SdkRoot\VC\include"
-$SdkLib     = "$SdkRoot\SDK\lib"
-$VcLib      = "$SdkRoot\VC\lib"
+$ClArgs = @(
+    "/nologo"
+)
 
-& "$ClExe" /nologo `
-    /I"$SdkInclude\um" `
-    /I"$SdkInclude\shared" `
-    /I"$SdkInclude\ucrt" `
-    /I"$VcInclude" `
-    /Fo:"$NativeObj" `
-    /LD /Fe:"$NativeOutput\MdViewerWlx.wlx" "$NativeDir\wlx_bootstrapper.c" `
-    /link `
-    /IMPLIB:"$NativeLib" `
-    /OUT:"$NativeOutput\MdViewerWlx.wlx" `
-    /LIBPATH:"$SdkLib" `
-    /LIBPATH:"$VcLib" `
-    kernel32.lib user32.lib
+if (-not $UseToolchainFromPath) {
+    $ClArgs += @(
+        "/I$SdkInclude\um",
+        "/I$SdkInclude\shared",
+        "/I$SdkInclude\ucrt",
+        "/I$VcInclude"
+    )
+}
+
+$ClArgs += @(
+    "/Fo:$NativeObj",
+    "/LD",
+    "/Fe:$NativeOutput\MdViewerWlx.wlx",
+    "$NativeDir\wlx_bootstrapper.c",
+    "/link",
+    "/IMPLIB:$NativeLib",
+    "/OUT:$NativeOutput\MdViewerWlx.wlx"
+)
+
+if (-not $UseToolchainFromPath) {
+    $ClArgs += @(
+        "/LIBPATH:$SdkLib",
+        "/LIBPATH:$VcLib"
+    )
+}
+
+$ClArgs += @(
+    "kernel32.lib",
+    "user32.lib"
+)
+
+& "$ClExe" @ClArgs
 if ($LASTEXITCODE -ne 0) { throw "cl.exe compile failed" }
 
 # Duplicate the x64 binary as .wlx64 to match common TC x64 plugin layout.

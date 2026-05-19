@@ -45,7 +45,7 @@ MarkdownViewer/
 |- README.md
 ```
 
-Note: there is currently no classic `.sln` file in the repository root. Builds are run directly against the individual projects or through the WLX PowerShell build script.
+The repository root contains `MdViewer.slnx`.
 
 ## Projects
 
@@ -206,13 +206,19 @@ The remaining logging is intended for production use and focuses on errors and w
 ## Build
 
 - .NET 10 SDK
-- ScopeCppSDK installed at:
+- One of the following native toolchains:
+
+```text
+an initialized MSVC developer environment with cl.exe on PATH
+```
+
+or:
 
 ```text
 C:\Program Files\Microsoft Visual Studio\18\Insiders\SDK\ScopeCppSDK\vc15
 ```
 
-The WLX build script expects `cl.exe` at exactly that location.
+The WLX build script first uses `cl.exe` from `PATH`. If none is available, it falls back to the ScopeCppSDK path above.
 
 ## Building the Desktop App
 
@@ -253,6 +259,27 @@ D:\Projekte\MarkdownViewer\deploy\MdViewerWlx-<version>-tc.zip
 ```
 
 The version number is read automatically from `tools\NativeBootstrapper\pluginst.inf`.
+
+## GitHub Releases
+
+GitHub Releases are built automatically from version tags.
+
+Workflow file:
+
+- `.github\workflows\release-wlx.yml`
+
+Release flow:
+
+1. update `tools\NativeBootstrapper\pluginst.inf`
+2. set `version=` to the release version, for example `1.0`
+3. create and push a matching Git tag, for example `v1.0`
+4. GitHub Actions builds `deploy\MdViewerWlx-<version>-tc.zip`
+5. the workflow publishes that ZIP as a GitHub Release asset
+
+Important rule:
+
+- the pushed Git tag must match the plugin version from `pluginst.inf`
+- example: `version=1.0` requires tag `v1.0`
 
 ## WLX Deploy Contents
 
@@ -317,7 +344,7 @@ This behavior is intentional so the first load stays usable even when WebView2 s
 - the project is Windows-only by design
 - the WLX plugin is x64-focused
 - the first WebView2 startup can be slower than later launches
-- the native WLX build depends on the configured ScopeCppSDK installation
+- the native WLX build needs either an MSVC developer environment on `PATH` or the configured ScopeCppSDK fallback path
 - the installation ZIP is intended for Total Commander and contains `pluginst.inf` at the ZIP root
 
 ## Important Files
