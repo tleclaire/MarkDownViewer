@@ -1,0 +1,23 @@
+project:
+  name: "MarkdownViewer"
+  root: "D:\\Projekte\\MarkdownViewer"
+  languages: ["C#"]
+  frameworks: ["WPF", ".NET 10"]
+  package_manager: "nuget"
+  test_runner: null
+
+memory_version: "1.0"
+last_updated: "2026-05-18T08:11:00+02:00"
+total_pipeline_runs: 1
+
+flags:
+  has_conventions: false
+  has_decisions: true
+  has_postmortems: false
+  has_tech_debt: false
+  has_preferences: false
+
+active_prevention_rules:
+  - id: "XAML-ICON-PATH"
+    when: "Icon-Attribut in Window-XAML ändern"
+    action: "Nicht als Dateipfad verwenden — immer pack://application:,,,-URI oder Code-Behind nutzen"

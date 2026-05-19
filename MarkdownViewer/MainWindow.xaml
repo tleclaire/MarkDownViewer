@@ -1,0 +1,80 @@
+﻿<Window x:Class="MarkdownViewer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="MdViewer"
+        Height="720" Width="960"
+        MinWidth="400" MinHeight="300"
+        WindowStartupLocation="CenterScreen"
+        UseLayoutRounding="True">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <ToolBar Grid.Row="0" Band="0" BandIndex="0"
+                 ToolBarTray.IsLocked="True"
+                 Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+                 Visibility="Visible"
+                 x:Name="ToolBar">
+            <Button x:Name="BtnReload" Click="OnReloadClick" ToolTip="Neu laden (F5)">
+                <TextBlock FontSize="14">&#x21bb;</TextBlock>
+            </Button>
+            <Separator />
+            <Button x:Name="BtnPrint" Click="OnPrintClick" ToolTip="Drucken (Ctrl+P)">
+                <TextBlock FontSize="14">&#x2399;</TextBlock>
+            </Button>
+            <Separator />
+            <CheckBox x:Name="ChkAutoReload" Content="Auto-Reload"
+                      IsChecked="True" Checked="OnAutoReloadChanged" Unchecked="OnAutoReloadChanged" />
+        </ToolBar>
+
+        <!-- WebView2 (Hauptinhalt) -->
+        <wv2:WebView2 x:Name="WebView"
+                       Grid.Row="1"
+                       Source="about:blank"
+                       Visibility="Visible" />
+
+        <!-- Fallback bei fehlender WebView2 Runtime -->
+        <Border x:Name="WebView2Fallback"
+                Grid.Row="1"
+                Visibility="Collapsed"
+                Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+                Padding="32">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                        MaxWidth="520">
+                <TextBlock FontSize="28" FontWeight="Bold" Margin="0,0,0,8"
+                           Text="⚠️ WebView2 Runtime fehlt" />
+                <TextBlock FontSize="14" TextWrapping="Wrap" Margin="0,0,0,16"
+                           Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}">
+                    Dieser Markdown-Viewer benötigt die
+                    <Hyperlink NavigateUri="https://developer.microsoft.com/microsoft-edge/webview2/"
+                               RequestNavigate="OnWebView2DownloadLinkClick">
+                        Microsoft Edge WebView2 Runtime
+                    </Hyperlink>.
+                    Sie ist auf aktuellen Windows 10/11 Systemen normalerweise bereits vorinstalliert.
+                </TextBlock>
+                <TextBlock x:Name="ErrorDetailText"
+                           FontFamily="Consolas" FontSize="11"
+                           TextWrapping="Wrap" Margin="0,0,0,16"
+                           Foreground="#c00" />
+                <Button Content="Download-Seite öffnen" Width="200" Height="32"
+                        Click="OnWebView2DownloadClick" />
+            </StackPanel>
+        </Border>
+
+        <!-- Status Bar -->
+        <StatusBar Grid.Row="2" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+            <StatusBarItem x:Name="StatusFile" />
+            <Separator />
+            <StatusBarItem x:Name="StatusInfo" />
+            <Separator />
+            <StatusBarItem x:Name="StatusEncoding" />
+            <Separator />
+            <StatusBarItem x:Name="StatusSize" />
+        </StatusBar>
+    </Grid>
+</Window>

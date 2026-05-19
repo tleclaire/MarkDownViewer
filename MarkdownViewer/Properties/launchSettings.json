@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MarkdownViewer": {
+      "commandName": "Project",
+      "commandLineArgs": "d:\\Projekte\\AITest\\benchmark-mcp-server-2026-05-17.md"
+    }
+  }
+}

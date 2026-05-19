@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="MarkdownViewer/MarkdownViewer.csproj" />
+  <Project Path="MdViewer.Shared/MdViewer.Shared.csproj" />
+  <Project Path="MdViewerWlx/MdViewerWlx.csproj" />
+</Solution>

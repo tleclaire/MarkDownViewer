@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>MdViewerWlx</RootNamespace>
+    <AssemblyName>MdViewerWlx</AssemblyName>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3967.48" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MdViewer.Shared\MdViewer.Shared.csproj" />
+  </ItemGroup>
+
+  <!--
+    Native PE exports are now provided by the NativeAOT bootstrapper
+    (MdViewerWlx.Bootstrap project). This managed assembly is loaded
+    at runtime via hostfxr.
+  -->
+
+</Project>
