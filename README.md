@@ -1,129 +1,129 @@
 # MarkdownViewer
 
-MarkdownViewer ist ein Windows-Projekt fuer die Anzeige von Markdown-Dateien mit zwei Hauptzielen:
+MarkdownViewer is a Windows project for viewing Markdown files with two primary targets:
 
-- eine eigenstaendige WPF-Desktop-Anwendung `MdViewer`
-- ein Total-Commander-Lister-Plugin `MdViewerWlx` fuer `*.md` und verwandte Formate
+- a standalone WPF desktop application: `MdViewer`
+- a Total Commander Lister plugin: `MdViewerWlx` for `*.md` and related formats
 
-Die Darstellung basiert auf `Markdig` fuer das Markdown-Rendering und `WebView2` fuer die HTML-Anzeige. Das WLX-Plugin verwendet einen nativen C-Bootstrapper, der die managed .NET-Komponenten ueber `hostfxr` laedt.
+Rendering is based on `Markdig` for Markdown parsing and `WebView2` for HTML display. The WLX plugin uses a native C bootstrapper that loads the managed .NET components through `hostfxr`.
 
-## Uebersicht
+## Overview
 
-- Plattform: Windows x64
-- UI-Technologie: WPF
+- Platform: Windows x64
+- UI technology: WPF
 - Runtime: .NET 10 Windows Desktop
-- Markdown-Parser: `Markdig`
-- HTML-Anzeige: `Microsoft.Web.WebView2`
-- Total Commander Plugin-Typ: `WLX` (Lister Plugin)
+- Markdown parser: `Markdig`
+- HTML renderer: `Microsoft.Web.WebView2`
+- Total Commander plugin type: `WLX` (Lister plugin)
 
 ## Features
 
-- Rendert Markdown als HTML in einer WPF/WebView2-Oberflaeche
-- Nutzt erweiterte Markdig-Features ueber `UseAdvancedExtensions()`
-- Unterstuetzt Emoji und Smiley-Syntax
-- Nutzt GitHub-inspiriertes CSS mit Hell/Dunkel-Anpassung per `prefers-color-scheme`
-- Setzt einen `base`-Pfad fuer relative Inhalte aus Markdown-Dateien
-- WLX-Plugin mit Unicode-Entry-Points fuer Total Commander x64
-- Fallback-first-Verhalten im WLX-Plugin mit sofortiger Text-Vorschau
-- anschliessendem Umschalten auf HTML/WebView2, sobald initialisiert
+- Renders Markdown as HTML inside a WPF/WebView2 UI
+- Uses advanced Markdig extensions via `UseAdvancedExtensions()`
+- Supports emoji and smiley syntax
+- Uses GitHub-inspired CSS with light/dark adaptation via `prefers-color-scheme`
+- Sets a `base` path for relative content from Markdown files
+- WLX plugin with Unicode entry points for Total Commander x64
+- Fallback-first WLX behavior with immediate text preview
+- Automatic switch to HTML/WebView2 once initialization completes
 
-## Repository-Struktur
+## Repository Structure
 
 ```text
 MarkdownViewer/
-|- MarkdownViewer/                     Desktop-App (MdViewer)
-|- MdViewer.Shared/                   Gemeinsame Rendering- und Logging-Bausteine
-|- MdViewerWlx/                       Managed WLX-Teil fuer Total Commander
+|- MarkdownViewer/                     Desktop app (MdViewer)
+|- MdViewer.Shared/                   Shared rendering and logging components
+|- MdViewerWlx/                       Managed WLX layer for Total Commander
 |- tools/
 |  |- NativeBootstrapper/
-|  |  |- wlx_bootstrapper.c           Native WLX-Bootstrapper in C
-|  |  |- build-wlx.ps1                Build-, Deploy- und Packaging-Skript
-|  |  |- pluginst.inf                 TC-Installationsbeschreibung
+|  |  |- wlx_bootstrapper.c           Native WLX bootstrapper in C
+|  |  |- build-wlx.ps1                Build, deploy, and packaging script
+|  |  |- pluginst.inf                 Total Commander installer descriptor
 |- deploy/
-|  |- wlx/                            Zusammengestelltes Plugin-Deploy-Verzeichnis
-|  |- MdViewerWlx-<version>-tc.zip    Installations-ZIP fuer Total Commander
+|  |- wlx/                            Assembled WLX deploy directory
+|  |- MdViewerWlx-<version>-tc.zip    Total Commander installation ZIP
 |- README.md
 ```
 
-Hinweis: Im aktuellen Stand gibt es keine `.sln` im Repository-Root. Die Builds laufen direkt ueber die einzelnen Projekte beziehungsweise ueber das PowerShell-Skript fuer das WLX-Paket.
+Note: there is currently no classic `.sln` file in the repository root. Builds are run directly against the individual projects or through the WLX PowerShell build script.
 
-## Projekte im Detail
+## Projects
 
 ### `MarkdownViewer`
 
-Eigenstaendige WPF-Desktop-Anwendung mit folgendem Projektprofil:
+Standalone WPF desktop application with the following profile:
 
-- Projektdatei: `MarkdownViewer\MarkdownViewer.csproj`
-- Ausgabe: `WinExe`
-- Target Framework: `net10.0-windows`
-- WPF aktiviert
-- App-Icon: `MarkdownViewer\Resources\app.ico`
+- Project file: `MarkdownViewer\MarkdownViewer.csproj`
+- Output type: `WinExe`
+- Target framework: `net10.0-windows`
+- WPF enabled
+- App icon: `MarkdownViewer\Resources\app.ico`
 
-Die Anwendung verwendet `MdViewer.Shared` fuer Rendering und Logging.
+The application uses `MdViewer.Shared` for rendering and logging.
 
 ### `MdViewer.Shared`
 
-Gemeinsame Bibliothek fuer die Desktop-App und das WLX-Plugin.
+Shared library used by both the desktop application and the WLX plugin.
 
-Wichtige Dateien:
+Important files:
 
 - `MdViewer.Shared\MarkdownRenderService.cs`
 - `MdViewer.Shared\FileLogger.cs`
 
-Aufgaben dieser Bibliothek:
+Responsibilities:
 
-- Markdown in vollstaendiges HTML-Dokument rendern
-- GitHub-inspiriertes CSS bereitstellen
-- Fehler- und Status-Logging in Dateien schreiben
+- render Markdown into a complete HTML document
+- provide GitHub-inspired CSS
+- write error and status logs to files
 
 ### `MdViewerWlx`
 
-Managed Teil des Total-Commander-Plugins.
+Managed part of the Total Commander plugin.
 
-- Projektdatei: `MdViewerWlx\MdViewerWlx.csproj`
-- Ausgabe: `Exe`
-- Target Framework: `net10.0-windows`
-- Plattform: `x64`
-- WPF aktiviert
+- Project file: `MdViewerWlx\MdViewerWlx.csproj`
+- Output type: `Exe`
+- Target framework: `net10.0-windows`
+- Platform: `x64`
+- WPF enabled
 
-Warum `Exe` statt `Dll`:
+Why `Exe` instead of `Dll`:
 
-- Der native Bootstrapper initialisiert die CLR im App-Modus ueber `hostfxr_initialize_for_dotnet_command_line`
-- dafuer wird `MdViewerWlx.exe` als Apphost benoetigt
-- nur so werden die App-Kontexte und Abhaengigkeiten fuer WPF und WebView2 sauber geladen
+- the native bootstrapper initializes the CLR in app mode through `hostfxr_initialize_for_dotnet_command_line`
+- this requires `MdViewerWlx.exe` as the app host
+- this is necessary so WPF and WebView2 dependencies are resolved in the correct app context
 
-Wichtige Dateien:
+Important files:
 
 - `MdViewerWlx\WlxExports.cs`
 - `MdViewerWlx\WlxHost.cs`
 - `MdViewerWlx\WlxContentView.cs`
 - `MdViewerWlx\Program.cs`
 
-## WLX-Plugin-Architektur
+## WLX Plugin Architecture
 
-Das Total-Commander-Plugin ist zweistufig aufgebaut.
+The Total Commander plugin is split into two layers.
 
 ### 1. Native Bootstrapper
 
-Datei: `tools\NativeBootstrapper\wlx_bootstrapper.c`
+File: `tools\NativeBootstrapper\wlx_bootstrapper.c`
 
-Aufgaben:
+Responsibilities:
 
-- wird direkt von Total Commander als `.wlx` bzw. `.wlx64` geladen
-- exportiert die WLX-Funktionen
-- liefert `ListGetDetectString` nativ aus
-- laedt `hostfxr.dll`
-- initialisiert die .NET-Runtime
-- laedt managed Export-Methoden aus `MdViewerWlx.dll`
+- loaded directly by Total Commander as `.wlx` or `.wlx64`
+- exports the WLX functions
+- handles `ListGetDetectString` natively
+- loads `hostfxr.dll`
+- initializes the .NET runtime
+- loads managed export methods from `MdViewerWlx.dll`
 
-Wichtige technische Punkte:
+Important implementation details:
 
-- verwendet `hdt=5` fuer `load_assembly_and_get_function_pointer`
-- verwendet `hostfxr_initialize_for_dotnet_command_line`
-- uebergibt `MdViewerWlx.exe` als `argv[0]`
-- unterstuetzt ANSI- und Unicode-Varianten der WLX-API
+- uses `hdt=5` for `load_assembly_and_get_function_pointer`
+- uses `hostfxr_initialize_for_dotnet_command_line`
+- passes `MdViewerWlx.exe` as `argv[0]`
+- supports both ANSI and Unicode WLX API variants
 
-Exportierte WLX-Funktionen:
+Exported WLX functions:
 
 - `ListGetDetectString`
 - `ListGetDetectStringW`
@@ -133,130 +133,130 @@ Exportierte WLX-Funktionen:
 - `ListLoadNextW`
 - `ListCloseWindow`
 
-Detect-String aktuell:
+Current detect string:
 
 ```text
 ext="MD" | ext="MARKDOWN" | ext="MDOWN" | ext="RST"
 ```
 
-### 2. Managed WLX-Teil
+### 2. Managed WLX Layer
 
-Dateien:
+Files:
 
 - `MdViewerWlx\WlxExports.cs`
 - `MdViewerWlx\WlxHost.cs`
 - `MdViewerWlx\WlxContentView.cs`
 
-Aufgaben:
+Responsibilities:
 
-- nimmt WLX-Aufrufe aus dem nativen Teil entgegen
-- erzeugt ein WPF-Child-Fenster innerhalb des von Total Commander gelieferten Parent-Fensters
-- initialisiert WebView2 verzogert und robust
-- zeigt bis dahin eine Text-Vorschau an
+- receives WLX calls forwarded from the native layer
+- creates a WPF child window inside the Total Commander parent window
+- initializes WebView2 in a delayed and robust way
+- shows a text preview until WebView2 is ready
 
-Besonderheiten des Hostings:
+Hosting details:
 
-- `HwndSource` wird direkt auf dem aufrufenden TC-UI-Thread erzeugt
-- das vermeidet Deadlocks beim Erzeugen des Child-Fensters
-- die eigentliche WebView2-Initialisierung wird per `DispatcherTimer` leicht verzoegert gestartet
-- Fokus und Z-Order werden aktiv korrigiert, damit die erste Lister-Instanz nicht hinter Total Commander verschwindet
+- `HwndSource` is created directly on the calling Total Commander UI thread
+- this avoids child-window creation deadlocks
+- actual WebView2 initialization is delayed slightly via `DispatcherTimer`
+- focus and z-order are corrected explicitly so the first Lister instance does not remain behind Total Commander
 
 ## Rendering
 
-Das Rendering erfolgt in `MdViewer.Shared\MarkdownRenderService.cs`.
+Rendering is implemented in `MdViewer.Shared\MarkdownRenderService.cs`.
 
-Aktivierte Markdig-Pipeline:
+Enabled Markdig pipeline features:
 
 - `UseAdvancedExtensions()`
 - `UseEmojiAndSmiley()`
 - `UseSoftlineBreakAsHardlineBreak()`
 
-Zusatzverhalten:
+Additional behavior:
 
-- relative Pfade werden ueber ein `file:///`-`base`-Tag aufgeloest
-- leere Dateien und Fehlerfaelle liefern ein vollstaendiges HTML-Dokument statt einer Exception
-- CSS fuer Light- und Dark-Mode ist direkt eingebettet
+- relative paths are resolved using a `file:///` `base` tag
+- empty files and file-read errors return a full HTML document instead of throwing exceptions
+- light and dark CSS is embedded directly into the HTML output
 
 ## Logging
 
-Datei: `MdViewer.Shared\FileLogger.cs`
+File: `MdViewer.Shared\FileLogger.cs`
 
-Der Logger schreibt Log-Dateien in den `Log`-Unterordner des jeweiligen Programmordners:
+The logger writes log files into a `Log` subdirectory next to the executable:
 
 ```text
-[Programmordner]\Log\log-YYYY-MM-DD.log
+[ProgramFolder]\Log\log-YYYY-MM-DD.log
 ```
 
-Beispiele:
+Examples:
 
-- Desktop-App: neben `MdViewer.exe`
-- WLX-Plugin: im Plugin-Ordner neben `MdViewerWlx.wlx` und `MdViewerWlx.exe`
+- desktop app: next to `MdViewer.exe`
+- WLX plugin: inside the plugin folder next to `MdViewerWlx.wlx` and `MdViewerWlx.exe`
 
-Aktuell verbleibendes Logging ist produktionsnah gehalten und konzentriert sich auf Fehler- und Warnsituationen.
+The remaining logging is intended for production use and focuses on errors and warnings.
 
-## Voraussetzungen
+## Requirements
 
-## Laufzeit
+## Runtime
 
 - Windows x64
-- installierte .NET-Desktop-Runtime bzw. SDK passend zu `net10.0-windows`
-- installierte WebView2 Runtime
-- fuer Total Commander: x64-Version von TC empfohlen
+- installed .NET desktop runtime or SDK compatible with `net10.0-windows`
+- installed WebView2 Runtime
+- for Total Commander: x64 Total Commander is recommended
 
 ## Build
 
 - .NET 10 SDK
-- ScopeCppSDK unter:
+- ScopeCppSDK installed at:
 
 ```text
 C:\Program Files\Microsoft Visual Studio\18\Insiders\SDK\ScopeCppSDK\vc15
 ```
 
-Das WLX-Build-Skript erwartet `cl.exe` genau an diesem Ort.
+The WLX build script expects `cl.exe` at exactly that location.
 
-## Build der Desktop-App
+## Building the Desktop App
 
-Beispiel:
+Example:
 
 ```powershell
 dotnet build "D:\Projekte\MarkdownViewer\MarkdownViewer\MarkdownViewer.csproj" -c Release
 ```
 
-## Build und Packaging des Total-Commander-Plugins
+## Building and Packaging the Total Commander Plugin
 
-Der empfohlene Weg ist das Build-Skript:
+The recommended path is the build script:
 
 ```powershell
 & "D:\Projekte\MarkdownViewer\tools\NativeBootstrapper\build-wlx.ps1"
 ```
 
-Das Skript erledigt:
+The script performs the following steps:
 
-1. `dotnet publish` fuer `MdViewerWlx`
-2. Kompilieren von `wlx_bootstrapper.c` zu `MdViewerWlx.wlx`
-3. Duplizieren nach `MdViewerWlx.wlx64`
-4. Zusammenstellen aller benoetigten Dateien in `deploy\wlx`
-5. Erzeugen eines installierbaren Total-Commander-ZIP-Pakets
+1. runs `dotnet publish` for `MdViewerWlx`
+2. compiles `wlx_bootstrapper.c` into `MdViewerWlx.wlx`
+3. duplicates the binary to `MdViewerWlx.wlx64`
+4. assembles all required files into `deploy\wlx`
+5. creates an installable Total Commander ZIP package
 
-Wichtige Build-Ausgaben:
+Important build outputs:
 
-- Deploy-Ordner:
+- Deploy directory:
 
 ```text
 D:\Projekte\MarkdownViewer\deploy\wlx
 ```
 
-- Installations-ZIP:
+- Installation ZIP:
 
 ```text
 D:\Projekte\MarkdownViewer\deploy\MdViewerWlx-<version>-tc.zip
 ```
 
-Die Versionsnummer wird automatisch aus `tools\NativeBootstrapper\pluginst.inf` gelesen.
+The version number is read automatically from `tools\NativeBootstrapper\pluginst.inf`.
 
-## Inhalt des WLX-Deploys
+## WLX Deploy Contents
 
-Typischer Inhalt von `deploy\wlx`:
+Typical contents of `deploy\wlx`:
 
 - `MdViewerWlx.wlx`
 - `MdViewerWlx.wlx64`
@@ -272,55 +272,55 @@ Typischer Inhalt von `deploy\wlx`:
 - `pluginst.inf`
 - `runtimes\...`
 
-## Installation in Total Commander
+## Installing in Total Commander
 
-### Empfohlen: Installation ueber ZIP
+### Recommended: ZIP-based installation
 
-1. Total Commander oeffnen
-2. `Configuration -> Plugins -> Install plugin`
-3. `D:\Projekte\MarkdownViewer\deploy\MdViewerWlx-<version>-tc.zip` auswaehlen
-4. Total Commander liest `pluginst.inf` aus dem ZIP und installiert das Plugin automatisch
+1. Open Total Commander
+2. Go to `Configuration -> Plugins -> Install plugin`
+3. Select `D:\Projekte\MarkdownViewer\deploy\MdViewerWlx-<version>-tc.zip`
+4. Total Commander reads `pluginst.inf` from the ZIP and installs the plugin automatically
 
-### Alternative: Manuelle Installation
+### Alternative: Manual installation
 
-1. Inhalt von `deploy\wlx` in einen Plugin-Ordner kopieren
-2. in Total Commander das Plugin registrieren oder ueber `pluginst.inf` installieren
+1. Copy the contents of `deploy\wlx` into a plugin folder
+2. Register the plugin in Total Commander or install it through `pluginst.inf`
 
-Aktiver Plugin-Ordner in der aktuellen Entwicklungsumgebung:
+Active plugin folder in the current development environment:
 
 ```text
 C:\wincmd\plugins\wlx\wlx_mdviewer
 ```
 
-Aktive TC-Konfiguration in der aktuellen Entwicklungsumgebung:
+Active Total Commander configuration file in the current development environment:
 
 ```text
 C:\Users\ThomasLeclaire\AppData\Roaming\GHISLER\WINCMD.INI
 ```
 
-Der relevante Eintrag liegt unter `[ListerPlugins]`.
+The relevant entry is stored in the `[ListerPlugins]` section.
 
-## Verhalten im Total Commander
+## Behavior in Total Commander
 
-Beim Oeffnen einer Markdown-Datei mit `F3`:
+When opening a Markdown file with `F3`:
 
-1. Total Commander laedt `MdViewerWlx.wlx` oder `MdViewerWlx.wlx64`
-2. der native Bootstrapper initialisiert die .NET-Runtime
-3. der managed Teil erstellt ein WPF-Child-Fenster
-4. zunaechst erscheint eine sofort verfuegbare Text-Vorschau
-5. danach wird auf die HTML/WebView2-Ansicht umgeschaltet
+1. Total Commander loads `MdViewerWlx.wlx` or `MdViewerWlx.wlx64`
+2. the native bootstrapper initializes the .NET runtime
+3. the managed layer creates a WPF child window
+4. an immediate text preview is shown first
+5. the view then switches to the rendered HTML/WebView2 display
 
-Dieses Verhalten ist absichtlich so umgesetzt, damit der erste Aufruf auch bei langsamer WebView2-Initialisierung benutzbar bleibt.
+This behavior is intentional so the first load stays usable even when WebView2 startup is slow.
 
-## Bekannte Hinweise
+## Notes
 
-- Das Projekt ist klar auf Windows ausgelegt
-- das WLX-Plugin ist auf x64 ausgelegt
-- der erste WebView2-Start kann langsamer sein als Folgeaufrufe
-- der Build des nativen WLX-Teils setzt das konfigurierte ScopeCppSDK voraus
-- das Installations-ZIP ist fuer Total Commander gedacht und enthaelt `pluginst.inf` im ZIP-Root
+- the project is Windows-only by design
+- the WLX plugin is x64-focused
+- the first WebView2 startup can be slower than later launches
+- the native WLX build depends on the configured ScopeCppSDK installation
+- the installation ZIP is intended for Total Commander and contains `pluginst.inf` at the ZIP root
 
-## Wichtige Dateien
+## Important Files
 
 - `README.md`
 - `MarkdownViewer\MarkdownViewer.csproj`
@@ -334,9 +334,9 @@ Dieses Verhalten ist absichtlich so umgesetzt, damit der erste Aufruf auch bei l
 - `tools\NativeBootstrapper\build-wlx.ps1`
 - `tools\NativeBootstrapper\pluginst.inf`
 
-## Entwicklungshinweise
+## Development Notes
 
-- Fuer normale Aenderungen am Rendering ist meist `MdViewer.Shared` der zentrale Einstiegspunkt
-- fuer WLX-Ladeprobleme sind nativer Bootstrapper und `WlxExports` die ersten Anlaufstellen
-- fuer Anzeigeprobleme im TC-Lister sind `WlxHost` und `WlxContentView` relevant
-- die Produktionsartefakte fuer Tests sollten aus `deploy\wlx` oder dem versionierten TC-ZIP genommen werden, nicht aus beliebigen Zwischenordnern unter `bin\`
+- for rendering changes, `MdViewer.Shared` is usually the main entry point
+- for WLX loading issues, start with the native bootstrapper and `WlxExports`
+- for display issues inside Total Commander Lister, inspect `WlxHost` and `WlxContentView`
+- for testing production artifacts, use `deploy\wlx` or the versioned Total Commander ZIP rather than arbitrary files from intermediate `bin\` folders
