@@ -20,9 +20,9 @@
   </ItemGroup>
 
   <!--
-    Native PE exports are now provided by the NativeAOT bootstrapper
-    (MdViewerWlx.Bootstrap project). This managed assembly is loaded
-    at runtime via hostfxr.
+    Native PE exports are provided by the C bootstrapper in
+    tools\NativeBootstrapper\wlx_bootstrapper.c.
+    This managed assembly is loaded at runtime via hostfxr.
   -->
 
 </Project>

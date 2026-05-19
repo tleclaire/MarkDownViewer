@@ -21,7 +21,6 @@ public static class WlxExports
 
     private static IntPtr CreateHost(IntPtr parentWin, string? fileToLoad)
     {
-        FileLogger.Info($"WLX CreateHost: parent=0x{parentWin.ToInt64():X}, file='{fileToLoad ?? string.Empty}'");
         var host = new WlxHost(parentWin, fileToLoad ?? string.Empty);
         IntPtr hwnd = host.Start();
 
@@ -59,7 +58,6 @@ public static class WlxExports
 
         try
         {
-            FileLogger.Info($"WLX ListLoad(ANSI): parent=0x{parentWin.ToInt64():X}, ptr=0x{fileToLoadPtr.ToInt64():X}, flags={showFlags}");
             return CreateHost(parentWin, fileToLoad);
         }
         catch (Exception ex)
@@ -83,7 +81,6 @@ public static class WlxExports
 
         try
         {
-            FileLogger.Info($"WLX ListLoadW(Unicode): parent=0x{parentWin.ToInt64():X}, ptr=0x{fileToLoadPtr.ToInt64():X}, flags={showFlags}");
             return CreateHost(parentWin, fileToLoad);
         }
         catch (Exception ex)
@@ -118,7 +115,6 @@ public static class WlxExports
     [UnmanagedCallersOnly]
     public static void ListCloseWindow(IntPtr listWin)
     {
-        FileLogger.Info($"WLX ListCloseWindow: hwnd=0x{listWin.ToInt64():X}");
         WlxHost? host = null;
 
         lock (_lock)

@@ -361,3 +361,14 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Repository-specific generated artifacts
+/deploy/
+/msbuild*.log
+/*.wlx
+/*.exe.WebView2/
+
+# NativeBootstrapper local test outputs
+/tools/NativeBootstrapper/test_*.exe
+/tools/NativeBootstrapper/corehost_trace.log
+/tools/NativeBootstrapper/trace_output.txt

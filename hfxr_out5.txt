@@ -1,7 +1,0 @@
-hostfxr: C:\Program Files\dotnet\host\fxr\10.0.8\hostfxr.dll
-hostfxr functions resolved OK
-init_fn rc=0 (0=OK, 1=already_init)
-getdel_fn(hdt=6) rc=0, ptr=00007FFB36540CF0
-Test1: [UCOnly] PingNative rc=-2146233054 (0x80131522) ptr=0000000000000000
-Test2: delegate Ping rc=-2146233086 (0x80131502) ptr=0000000000000000
-Test3: delegate(unqual) Ping rc=-2146233086 ptr=0000000000000000

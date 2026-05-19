@@ -30,7 +30,7 @@ internal sealed class WlxContentView : Grid
         _filePath = filePath;
         _ = SharedEnvironment.Value;
 
-        Background = new SolidColorBrush(Color.FromRgb(0x1E, 0x3A, 0x5F));
+        Background = SystemColors.WindowBrush;
 
         _webView = new WebView2
         {
@@ -55,10 +55,10 @@ internal sealed class WlxContentView : Grid
 
         _statusText = new TextBlock
         {
-            Text = $"MdViewerWlx aktiv: HTML-Ansicht wird initialisiert ...",
-            FontSize = 13,
-            Foreground = Brushes.White,
-            Background = new SolidColorBrush(Color.FromArgb(0xCC, 0x10, 0x1F, 0x33)),
+            Text = "HTML-Ansicht wird initialisiert ...",
+            FontSize = 12,
+            Foreground = Brushes.DimGray,
+            Background = new SolidColorBrush(Color.FromArgb(0xE8, 0xF4, 0xF4, 0xF4)),
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Top,
             TextWrapping = TextWrapping.Wrap,
@@ -106,7 +106,7 @@ internal sealed class WlxContentView : Grid
         }
         catch (Exception ex)
         {
-            _statusText.Text = "Text-Fallback aktiv: HTML-Ansicht konnte nicht initialisiert werden.";
+            _statusText.Text = "Text-Vorschau aktiv. HTML-Ansicht konnte nicht initialisiert werden.";
             _webView.Visibility = Visibility.Collapsed;
             FileLogger.Error("WLX Content: WebView2-Initialisierung fehlgeschlagen", ex);
             return false;
@@ -121,7 +121,7 @@ internal sealed class WlxContentView : Grid
         {
             try
             {
-                _statusText.Text = $"MdViewerWlx aktiv: HTML-Ansicht wird initialisiert ({attempt}/20) ...";
+                _statusText.Text = $"HTML-Ansicht wird initialisiert ({attempt}/20) ...";
                 var environment = await SharedEnvironment.Value;
                 await _webView.EnsureCoreWebView2Async(environment);
                 return;
@@ -154,7 +154,7 @@ internal sealed class WlxContentView : Grid
             const int maxChars = 200_000;
             if (text.Length > maxChars)
             {
-                text = text[..maxChars] + "\n\n---\nText-Fallback gekürzt. Die vollständige HTML-Ansicht folgt nach der WebView2-Initialisierung.\n";
+                text = text[..maxChars] + "\n\n---\nText-Vorschau gekürzt. Die vollständige HTML-Ansicht folgt nach der WebView2-Initialisierung.\n";
             }
 
             return text;

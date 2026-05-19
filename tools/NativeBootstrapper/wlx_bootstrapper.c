@@ -15,7 +15,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdarg.h>
 
 // ---- DLL module handle (stored from DllMain) ----
 static HMODULE g_hinstDLL = NULL;
@@ -83,44 +82,6 @@ static managed_list_load_next_w_fn g_list_load_next_w = NULL;
 static managed_list_close_window_fn g_list_close = NULL;
 
 static int GetMyDir(wchar_t* buf, size_t bufsz);
-
-// ---- Native bootstrapper logging ----
-static void NativeLog(const char* fmt, ...)
-{
-    wchar_t my_dir[MAX_PATH];
-    wchar_t log_path[MAX_PATH];
-    HANDLE hFile;
-    DWORD written = 0;
-    va_list args;
-    char buffer[1024];
-    int len;
-
-    if (GetMyDir(my_dir, MAX_PATH) != 0)
-        return;
-
-    swprintf_s(log_path, MAX_PATH, L"%sbootstrapper-native.log", my_dir);
-
-    hFile = CreateFileW(
-        log_path,
-        FILE_APPEND_DATA,
-        FILE_SHARE_READ | FILE_SHARE_WRITE,
-        NULL,
-        OPEN_ALWAYS,
-        FILE_ATTRIBUTE_NORMAL,
-        NULL);
-    if (hFile == INVALID_HANDLE_VALUE) return;
-
-    va_start(args, fmt);
-    len = _vsnprintf_s(buffer, sizeof(buffer), _TRUNCATE, fmt, args);
-    va_end(args);
-
-    if (len < 0) len = (int)strlen(buffer);
-    buffer[len++] = '\r';
-    buffer[len++] = '\n';
-
-    WriteFile(hFile, buffer, (DWORD)len, &written, NULL);
-    CloseHandle(hFile);
-}
 
 // ---- Helper: get directory of this DLL ----
 static int GetMyDir(wchar_t* buf, size_t bufsz)
@@ -288,7 +249,6 @@ __declspec(dllexport) void __stdcall ListGetDetectString(void* detectString, int
     size_t slen = strlen(detect);
     int32_t len = (int32_t)(slen < (size_t)(maxLen - 1) ? slen : (size_t)(maxLen - 1));
 
-    NativeLog("ListGetDetectString called, maxLen=%d", maxLen);
     memcpy(detectString, detect, (size_t)len);
     ((char*)detectString)[len] = '\0';
 }
@@ -299,7 +259,6 @@ __declspec(dllexport) void __stdcall ListGetDetectStringW(void* detectString, in
     size_t slen = wcslen(detect);
     int32_t len = (int32_t)(slen < (size_t)(maxLen - 1) ? slen : (size_t)(maxLen - 1));
 
-    NativeLog("ListGetDetectStringW called, maxLen=%d", maxLen);
     memcpy(detectString, detect, (size_t)len * sizeof(wchar_t));
     ((wchar_t*)detectString)[len] = L'\0';
 }
@@ -307,7 +266,6 @@ __declspec(dllexport) void __stdcall ListGetDetectStringW(void* detectString, in
 __declspec(dllexport) void* __stdcall ListLoad(
     void* parentWin, void* fileToLoad, int32_t showFlags)
 {
-    NativeLog("ListLoad called, parent=%p file=%p flags=%d", parentWin, fileToLoad, showFlags);
     if (EnsureManagedMethodsLoaded() != 0) return NULL;
     return (void*)g_list_load(parentWin, (const char*)fileToLoad, showFlags);
 }
@@ -315,7 +273,6 @@ __declspec(dllexport) void* __stdcall ListLoad(
 __declspec(dllexport) void* __stdcall ListLoadW(
     void* parentWin, void* fileToLoad, int32_t showFlags)
 {
-    NativeLog("ListLoadW called, parent=%p file=%p flags=%d", parentWin, fileToLoad, showFlags);
     if (EnsureManagedMethodsLoaded() != 0) return NULL;
     if (g_list_load_w) return (void*)g_list_load_w(parentWin, (const wchar_t*)fileToLoad, showFlags);
     return (void*)g_list_load(parentWin, (const char*)fileToLoad, showFlags);

@@ -39,8 +39,6 @@ internal sealed class WlxHost : IDisposable
     /// </summary>
     public IntPtr Start()
     {
-        FileLogger.Info("WLX Host: Starte auf Thread " + Environment.CurrentManagedThreadId);
-
         // WPF-Dispatcher initialisieren (erzeugt ggf. einen neuen für diesen Thread)
         _ = Dispatcher.CurrentDispatcher;
 
@@ -58,7 +56,6 @@ internal sealed class WlxHost : IDisposable
         };
 
         _source = new HwndSource(sourceParams);
-        FileLogger.Info("WLX Host: HwndSource erstellt, Handle=" + _source.Handle);
 
         // WPF-Content erstellen und anzeigen
         var content = new WlxContentView(_filePath);
@@ -107,12 +104,7 @@ internal sealed class WlxHost : IDisposable
     {
         try
         {
-            FileLogger.Info("WLX Host: Starte WebView2-Initialisierung...");
-            bool success = await content.InitializeAsync();
-            if (success)
-                FileLogger.Info("WLX Host: WebView2-Initialisierung abgeschlossen");
-            else
-                FileLogger.Warning("WLX Host: WebView2 blieb im Fehler-/Fallback-Zustand");
+            await content.InitializeAsync();
         }
         catch (Exception ex)
         {

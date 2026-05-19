@@ -1,3 +1,0 @@
-DBG: config_path=D:\Projekte\MarkdownViewer\MdViewerWlx\bin\Release\net10.0-windows\MdViewerWlx.runtimeconfig.json
-DBG: host_path=D:\Projekte\MarkdownViewer\MdViewerWlx\bin\Release\net10.0-windows\MdViewerWlx.wlx
-DBG: sizeof(params)=24
